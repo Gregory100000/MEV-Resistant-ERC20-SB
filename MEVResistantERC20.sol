@@ -346,7 +346,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata, Ownable {
 		// If it is, prevent the transfer.
 		if (_transferTimeWhitelist[from] != true) {
 			// Alter the # of seconds according to the chain specifics.
-			require(_transferTime[from] == now, "Please wait 1 block (~10-15 seconds) before transferring or selling your tokens.");
+			require(_transferTime[from] == uint32(now), "Please wait 1 block (~10-15 seconds) before transferring or selling your tokens.");
 		}
 	}
 
