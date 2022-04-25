@@ -2,7 +2,7 @@
 
 ### **Summary**
 Everyone hates sandwich attacks, except for those attacking. This ERC20 contract discourages them
-by preventing a buy and sell in the same block. A person will be unable to sell their coins
+by preventing a buy and sell in the same block. A person/bot will be unable to sell their coins
 unless they wait 1 block (typically 10-15 seconds on Ethereum).
 
 ### **Description**
