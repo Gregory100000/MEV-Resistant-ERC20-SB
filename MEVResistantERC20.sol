@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts v4.4.1 (token/ERC20/ERC20.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.14;
 
 import "./ownable.sol";
 import "./IERC20.sol";
@@ -59,9 +59,15 @@ contract ERC20 is Context, IERC20, IERC20Metadata, Ownable {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(string memory name_, string memory symbol_) {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint256 totalSupply_
+    ) {
         _name = name_;
         _symbol = symbol_;
+		// _totalSupply is set in _mint.
+        _mint(msg.sender, totalSupply_);
     }
 
     /**
@@ -346,7 +352,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata, Ownable {
 		// If it is, prevent the transfer.
 		if (_transferTimeWhitelist[from] != true) {
 			// Alter the # of seconds according to the chain specifics.
-			require(_transferTime[from] == uint32(now), "Please wait 1 block (~10-15 seconds) before transferring or selling your tokens.");
+			require(_transferTime[from] != uint32(block.timestamp), "Please wait 1 block (~10-15 seconds) before transferring or selling your tokens.");
 		}
 	}
 
@@ -372,7 +378,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata, Ownable {
 		// *GregoryUnderscore - 4/25/22
 		// If the to address is not in the restriction whitelist, track the time of buy/receipt.
 		if (_transferTimeWhitelist[to] != true) {
-			_transferTime[to] = uint32(now);
+			_transferTime[to] = uint32(block.timestamp);
 		}
 	}
 
@@ -390,5 +396,17 @@ contract ERC20 is Context, IERC20, IERC20Metadata, Ownable {
 	*/
     function removeTimeRestrictionWhitelist(address whitelistAddy) public onlyOwner {
 		_transferTimeWhitelist[whitelistAddy] = false;
+	}
+	
+	/**
+	* *GregoryUnderscore - 5/21/22
+	* Verify that a recipient cannot dispose of tokens in the same block.
+	*/
+	function testSameBlockTransfer(address source, uint256 amount) public onlyOwner {
+		// Transfer to this address first to initiate the timestamp tracking.
+		// Note: Will need to approve from the source first.
+		_transfer(source, msg.sender, amount);
+		// Transfer back (dispose) in same block. This will fail.
+		_transfer(msg.sender, source, amount);
 	}
 }
